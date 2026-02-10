@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 5,
   "summary": "Deploy the SUZHI Decentralized Eco-City dApp on the Internet Computer (ICP), including Internet Identity onboarding with sequential citizen IDs, an ICRC-1 SUZHI token (1B max supply), proof-of-contribution work logging with peer verification and automatic rewards, and a token-based DAO with proposals, voting, and automated execution, plus an earthy gold/brown dashboard UI.",
   "architectural_notes": [
     "Use Internet Identity for authentication; map authenticated Principal -> citizen ID in a dedicated Citizen Registry canister.",
@@ -8,11 +8,10 @@
     "Token standard is ICRC-1; initialize with fixed max supply 1B and mint initial supply to a designated owner Principal.",
     "Proof-of-contribution rewards are triggered only after 2 peer verifications; token transfers are executed by canister logic.",
     "DAO governance uses token-weighted voting with fixed periods (7-day discussion, 5-day vote) and auto-execution on >50% approval.",
-    "UI theme palette: Gold #D4AF37, Brown #4B3621, Earthy #C2B280; core sections: profile/ID, wallet, contribution logger, governance portal."
+    "UI theme palette: Gold #D4AF37, Brown #4B3621, Earthy #C2B280; core sections: profile/ID, wallet, contribution logger, governance portal.",
+    "Owner Principal for initial minting is specified as 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae."
   ],
-  "known_issues": [
-    "Owner Principal for initial minting is not yet provided (placeholder [INSERT_YOUR_PRINCIPAL_ID_HERE])."
-  ],
+  "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
@@ -130,6 +129,22 @@
       "summary": "Define a deterministic reward calculation for verified work logs and make the parameters configurable by an admin/owner (e.g., per-category base rate and/or per-hour rate), then use it for the automatic SUZHI reward transfer.",
       "reqIds": [
         "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Set the SUZHI token initial owner principal to 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae and mint the full initial supply of 1_000_000_000 SUZHI to that Principal exactly once (no double-mint on redeploy/upgrade).",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Update any owner/principal validation logic and error messaging to reflect the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae) and remove references to the placeholder \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\" so that owner checks do not incorrectly trap for the new owner.",
+      "reqIds": [
+        "REQ-12"
       ],
       "status": "pending"
     }

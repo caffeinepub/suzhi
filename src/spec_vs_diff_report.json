@@ -1,131 +1,41 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T19:51:12.511Z",
-  "summary": "Diff adds a new Motoko backend actor skeleton plus a new React dashboard UI (auth/login, profile, wallet, contributions, governance) and supporting hooks/styles. However, several core backend requirements (stable persistence, full ICRC-1 interface, initial mint/owner placeholder flow, bulk airdrop, deterministic reward config, and DAO timing/execution rules) are not evidenced in the truncated backend diff, and the frontend does not show a complete governance voting flow. Some extra features (user profile name storage, secret-token-based access-control initialization) appear that were not requested.",
+  "generatedAt": "2026-02-10T20:14:42.941Z",
+  "summary": "The diff introduces a migration module and new persistent state fields (notably `initialMintCompleted`), but there is no clear evidence in the provided truncated diff that the specified owner principal is set, that the initial 1,000,000,000 SUZHI is minted to that principal exactly once, or that placeholder owner validation/error messages were updated/removed.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Citizen Registry assigns unique sequential IDs and persists the counter and mapping in stable memory across upgrades.",
-      "reason": "backend/main.mo shows `var lastCitizenId = 0;` and `principalToCitizenId = Map.empty<Principal, Nat>()`, but no evidence of `stable var`, `preupgrade/postupgrade`, or other stable-memory persistence for the counter/mapping across upgrades in the visible diff.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "Implement SUZHI token following the ICRC-1 standard interface (name/symbol/decimals/total_supply/fee/balance_of/transfer/metadata) with max supply 1,000,000,000 and configurable fee + clear insufficient funds errors.",
-      "reason": "The diff shows `totalSuzi = 1_000_000_000` and `allBalances = Map.empty<Principal, Nat>()`, and the frontend calls `actor.getBalance` and `actor.transfer`, but there is no evidence of the ICRC-1 standard endpoints (`icrc1_*` methods, metadata, fee, decimals, etc.) in the visible backend diff.",
+      "id": "REQ-11",
+      "requirement": "Set the SUZHI token initial owner principal to 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae and mint the full initial supply of 1_000_000_000 SUZHI to that Principal exactly once (no double-mint on redeploy/upgrade).",
+      "reason": "The diff shows `totalSuzi = 1_000_000_000` and adds `initialMintCompleted`, but there is no visible initialization code that credits `allBalances` for the specified principal, nor any visible logic that uses `initialMintCompleted` to prevent re-minting on upgrade/redeploy.",
       "evidence": [
         "backend/main.mo",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/components/wallet/TokenWalletCard.tsx"
+        "backend/migration.mo"
       ]
     },
     {
-      "id": "REQ-4",
-      "requirement": "Mint entire supply at initialization to owner Principal ID placeholder \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\" and provide controller-restricted one-time method to set/replace placeholder before production.",
-      "reason": "backend/main.mo shows `owner : ?Principal = null;` and a `checkValidPrincipalId` that hard-codes a specific principal and traps with a message referencing the placeholder, but there is no evidence of: (a) initial minting of the full supply to the configured owner at init, or (b) a controller-restricted one-time method to set the real owner when placeholder is present.",
+      "id": "REQ-12",
+      "requirement": "Update any owner/principal validation logic and error messaging to reflect the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae) and remove references to the placeholder \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\".",
+      "reason": "No owner principal constant/variable or updated validation logic is shown in the truncated `backend/main.mo` snippet, and there is no evidence that trap/error strings referencing the placeholder were removed or replaced.",
       "evidence": [
         "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "requirement": "Owner-restricted bulk distribution method `bulkAirdrop(recipients: [Principal], amount: Nat)` with clear error reporting and no silent partial application.",
-      "reason": "No `bulkAirdrop` method is visible in the backend diff summary (backend/main.mo is truncated, and no evidence of this method appears in shown sections).",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "requirement": "Proof of Contribution: create logs in four categories and require exactly 2 unique peer verifications (not the worker) before backend automatically transfers SUZHI; persist logs and verification state in stable memory; UI shows counts/status.",
-      "reason": "Frontend implements work-log creation UI with the 4 categories and displays `validations` and status, but backend evidence is incomplete: only in-memory maps are shown (`workLogs`, `workLogVerifications`) with no stable persistence shown, and no visible backend logic proving: (a) unique verifier enforcement, (b) exactly-2 verification trigger, (c) automatic token transfer on second verification, (d) rewarded cannot happen twice.",
-      "evidence": [
-        "backend/main.mo",
-        "frontend/src/components/contributions/WorkLogForm.tsx",
-        "frontend/src/components/contributions/WorkLogList.tsx",
-        "frontend/src/lib/workLog.ts"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "requirement": "Deterministic reward calculation with configurable parameters set by admin/owner; record reward paid per log.",
-      "reason": "No reward configuration types/methods, admin-only update method, or recorded reward amount for each work log are evidenced in the visible backend diff.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "requirement": "DAO: proposal submission (description, budget, timeline), 7-day discussion + 5-day voting enforced by backend, token-weighted voting, outcome computed after voting, and automatic execution for proposals approved by >50% with on-chain effect; frontend supports list/detail/submit/vote with phase indicators.",
-      "reason": "Frontend shows proposal list + creation form and a phase indicator computed client-side from `startTime`. Backend DAOProposal type shown lacks a `timeline` field and no backend timing enforcement, voting methods, token-weighted vote accounting, end-of-vote outcome computation, or automatic execution effect are evidenced in the visible backend snippet. Frontend diff also does not show a voting UI/action (only list and create are shown).",
-      "evidence": [
-        "backend/main.mo",
-        "frontend/src/components/governance/GovernancePortal.tsx",
-        "frontend/src/components/governance/ProposalForm.tsx",
-        "frontend/src/components/governance/ProposalList.tsx",
-        "frontend/src/lib/governance.ts"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "User profile system requiring users to enter and save a name via a modal (ProfileSetupModal) and backend `UserProfile` storage.",
-      "reason": "BuildRequest does not ask for collecting/storing a user name; it only requires showing principal + citizen ID in the profile section.",
+      "description": "Added a separate migration module (`backend/migration.mo`) and wired it into the actor via `(with migration = Migration.run)`.",
+      "reason": "The BuildRequest constraint says: \"Backend must remain a single Motoko actor with all logic in backend/main.mo.\" Adding `backend/migration.mo` introduces backend logic outside `backend/main.mo`, which is not requested and may violate the stated constraint.",
       "evidence": [
-        "backend/main.mo",
-        "frontend/src/components/auth/ProfileSetupModal.tsx",
-        "frontend/src/hooks/useCurrentUser.ts",
-        "frontend/src/App.tsx"
-      ]
-    },
-    {
-      "description": "Secret-token-based access control initialization from URL parameter `caffeineAdminToken` calling backend method `_initializeAccessControlWithSecret`.",
-      "reason": "BuildRequest does not specify an admin secret token bootstrap flow via URL parameters or an `_initializeAccessControlWithSecret` method; it only specifies owner/controller-restricted admin operations.",
-      "evidence": [
-        "frontend/src/hooks/useActor.ts"
-      ]
-    },
-    {
-      "description": "Caffeine.ai attribution link and UTM parameters in the app footer.",
-      "reason": "Not requested by the BuildRequest; it is additional user-facing UI content.",
-      "evidence": [
-        "frontend/src/components/layout/AppShell.tsx"
+        "backend/migration.mo",
+        "backend/main.mo"
       ]
     }
   ],
-  "confidence": 0.78,
+  "confidence": 0.74,
   "changed_files": [
-    "all_files_summary.json",
     "backend/main.mo",
-    "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/auth/LoginButton.tsx",
-    "frontend/src/components/auth/ProfileSetupModal.tsx",
-    "frontend/src/components/contributions/ContributionLogger.tsx",
-    "frontend/src/components/contributions/WorkLogForm.tsx",
-    "frontend/src/components/contributions/WorkLogList.tsx",
-    "frontend/src/components/governance/GovernancePortal.tsx",
-    "frontend/src/components/governance/ProposalForm.tsx",
-    "frontend/src/components/governance/ProposalList.tsx",
-    "frontend/src/components/layout/AppShell.tsx",
-    "frontend/src/components/profile/UserProfileCard.tsx",
-    "frontend/src/components/wallet/TokenWalletCard.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useCurrentUser.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/lib/governance.ts",
-    "frontend/src/lib/workLog.ts",
-    "frontend/src/main.tsx",
-    "frontend/src/pages/Dashboard.tsx",
-    "frontend/src/utils/urlParams.ts",
-    "frontend/tailwind.config.js",
+    "backend/migration.mo",
     "project_state.json"
   ]
 }

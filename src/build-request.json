@@ -1,215 +1,66 @@
 {
   "kind": "build_request",
-  "title": "Deploy SUZHI dApp on ICP: Internet Identity onboarding, sequential Citizen IDs, SUZHI ICRC-1 token, Proof-of-Contribution rewards, and token-based DAO + dashboard UI",
+  "title": "Mint initial 1,000,000,000 SUZHI supply to specified Principal",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Integrate Internet Identity (II) authentication in the frontend so users can sign in/out and the app can call the backend as the authenticated principal.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Integrate Internet Identity (II) for user authentication."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Users can sign in with Internet Identity and see their authenticated principal in the UI (or equivalent logged-in state).",
-        "All authenticated actions (onboard, create work logs, verify, transfer, create proposal, vote) are performed using the logged-in identity."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Implement a Citizen Registry in the Motoko backend that assigns each newly onboarded principal a unique sequential citizen ID (1, 2, 3, ...) and persists the counter and registry mapping in stable memory across upgrades.",
+      "id": "REQ-11",
+      "text": "Set the SUZHI token initial owner principal to 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae and mint the full initial supply of 1_000_000_000 SUZHI to that Principal exactly once (no double-mint on redeploy/upgrade).",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-9"
         ],
         "quotes": [
-          "Create a \"Citizen Registry\" canister that assigns every newly onboarded user a unique, sequential ID number (e.g., 1, 2, 3...) stored in stable memory."
+          "Mint 1Billion SUZHI tokens ICRC-1 standard token called \"SUZHI\". mint to this principal id 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae"
         ]
       },
       "acceptanceCriteria": [
-        "Calling an onboard method as a new principal returns a new sequential ID starting at 1.",
-        "Calling onboard again as the same principal returns the already assigned ID and does not increment the counter.",
-        "After a canister upgrade, previously assigned IDs and the next ID counter are preserved."
+        "After deployment, getBalance(Principal.fromText(\"2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae\")) returns 1_000_000_000.",
+        "No other principal has a non-zero balance unless explicitly transferred/airdropped after deployment.",
+        "Upgrading the canister does not mint an additional 1_000_000_000 to the owner (owner balance is not duplicated/increased by the initialization logic)."
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Implement the SUZHI token in the Motoko backend following the ICRC-1 standard interface, with max supply = 1,000,000,000 and fully transferable balances between users.",
+      "id": "REQ-12",
+      "text": "Update any owner/principal validation logic and error messaging to reflect the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae) and remove references to the placeholder \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\" so that owner checks do not incorrectly trap for the new owner.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-9"
         ],
         "quotes": [
-          "Create a token called SUZHI with a Max Supply of 1,000,000,000 (1 Billion).",
-          "Ensure the token is fully transferable between users."
+          "mint to this principal id 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae"
         ]
       },
       "acceptanceCriteria": [
-        "Backend exposes the standard ICRC-1 query/metadata endpoints required for basic ICRC-1 compatibility (name, symbol, decimals, total_supply, fee, balance_of, transfer, metadata as applicable).",
-        "total_supply never exceeds 1,000,000,000.",
-        "Users can transfer SUZHI to another principal and balances update accordingly.",
-        "Transfers apply a configurable fee (defaulting to 0.0001 tokens worth in base units) and fail with a clear error when funds are insufficient."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Mint the entire 1,000,000,000 SUZHI supply at initialization to the provided owner Principal ID \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\", and provide a safe way to set/replace this placeholder with the real owner principal before production use.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Minting: Mint the entire 1 Billion supply directly to my Principal ID: [INSERT_YOUR_PRINCIPAL_ID_HERE]."
-        ]
-      },
-      "acceptanceCriteria": [
-        "On first deployment/initialization, the full supply is credited to the configured owner principal.",
-        "If the owner principal is still the literal placeholder, the build includes an explicit, controller-restricted method to set the real owner principal once, and minting/ownership behavior is documented in code comments/user-facing admin UI copy.",
-        "Only the owner/controller can access any admin-only token distribution methods (e.g., bulk airdrop)."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Add an owner-restricted bulk distribution method `bulkAirdrop(recipients: [Principal], amount: Nat)` that transfers `amount` SUZHI to each recipient in a single call (or batched safely) to quickly fund ~100 testers.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "You can ask Caffeine AI to add a \"Bulk Transfer\" function: Function: bulkAirdrop(recipients: [Principal], amount: Nat)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Only the configured token owner (or canister controller, as defined) can call bulkAirdrop successfully.",
-        "If any transfer cannot be completed (e.g., insufficient owner balance), the method returns a clear error (and does not silently partially apply without indicating which transfers succeeded/failed).",
-        "Airdropped balances are immediately visible via balance_of."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Implement Proof of Contribution: allow users to create work logs in four categories (Physical, Knowledge, Creative, Wellness) and require exactly 2 peer verifications (unique verifiers, not the worker) before the backend automatically transfers SUZHI tokens to the worker.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Build a system where users log work in four categories: Physical, Knowledge, Creative, and Wellness.",
-          "Implement a logic where a work log requires 2 peer verifications before a smart contract automatically triggers a SUZHI token transfer to the worker."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Frontend provides a form to submit a work log with category and required fields (at minimum: description and time spent).",
-        "Backend stores work logs and their verification state in stable memory.",
-        "A work log can be verified by principals other than the worker; the same verifier cannot verify the same work log twice.",
-        "When the second valid verification is recorded, the reward is transferred automatically and the work log is marked as rewarded (cannot be rewarded again).",
-        "Frontend shows pending logs, verification count (0/2, 1/2, 2/2), and rewarded status."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Define a deterministic reward calculation for verified work logs and make the parameters configurable by an admin/owner (e.g., per-category base rate and/or per-hour rate), then use it for the automatic SUZHI reward transfer.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Once verified, smart contracts automatically calculate appropriate SUZHI tokens based on work type, skill level, and time invested."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Reward amount for a log is computed deterministically from stored log fields and current config.",
-        "Admin/owner can update reward parameters via a restricted method; non-admin calls are rejected.",
-        "Reward amount used for a given work log is recorded (so the UI can display what was paid)."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Implement a DAO system in the Motoko backend for One Token, One Vote with: proposal submission (description, budget, timeline), a 7-day discussion period, a 5-day voting period, and automatic execution for proposals approved by >50% of votes.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Implement a DAO Canister for \"One Token, One Vote.\"",
-          "Features: Proposal submission (description, budget, timeline), a 7-day discussion period, and a 5-day voting period.",
-          "Execution: Approved proposals (>50% vote) must execute automatically via smart contracts."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Users can create proposals containing description, budget, and timeline.",
-        "Each proposal enforces timing: discussion phase lasts 7 days from creation; voting phase lasts the next 5 days; votes outside voting phase are rejected.",
-        "Voting power is proportional to SUZHI token holdings (document whether balance is measured at vote time or snapshotted; implementation must be consistent and testable).",
-        "Proposal outcome is computed at the end of the voting phase; if approval is >50% (clearly defined in code—e.g., yesVotes > noVotes and yesVotes / (yesVotes+noVotes) > 0.5), proposal is marked approved.",
-        "Approved proposals execute automatically with an on-chain effect (at minimum: mark executed + perform a deterministic action such as transferring the proposal budget from a defined DAO treasury/owner account to a specified recipient/creator).",
-        "Frontend includes a Governance Portal to list proposals, view details (including phase countdowns), submit proposals, and cast votes."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Build the SUZHI dashboard UI with the specified Gold (#D4AF37), Brown (#4B3621), and Earthy (#C2B280) palette, and include the following sections: User Profile (show principal + unique citizen ID), Token Wallet (balance + transfer + optional buy placeholder), Contribution Logger (create/view/verify logs), and Governance Portal (view/submit/vote). All user-facing text must be in English.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Design a dashboard using a Gold (#D4AF37), Brown (#4B3621), and Earthy (#C2B280) color palette.",
-          "Layout: User Profile (with Unique ID), Token Wallet, Contribution Logger, and a Governance Portal to view/vote on proposals.",
-          "Use English for any user-facing text in the build request."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Dashboard uses the specified palette consistently across navigation, background, buttons, and typography.",
-        "User Profile section shows the assigned sequential Citizen ID after onboarding.",
-        "Token Wallet section shows SUZHI balance and enables transfer to another principal.",
-        "Contribution Logger allows creating logs and verifying others’ logs where permitted.",
-        "Governance Portal lists proposals and supports proposal creation and voting with phase indicators."
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Apply a coherent 'eco-city' visual theme consistent with the gold/brown/earthy palette (typography, spacing, components styling) across the app without introducing new product features.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "To get that \"Eco-City\" feel... Make the background a deep earthy brown, use gold gradients for the 'Access DAO' buttons, and use a clean, high-contrast white or sand color for the text."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Primary CTAs use gold accents/gradients and remain accessible (sufficient contrast).",
-        "Background and surfaces use earthy browns/tans with readable sand/white text.",
-        "Styling is consistent across all dashboard sections (no mixed, unrelated themes)."
+        "Owner validation (if used anywhere for admin/owner-only actions) recognizes 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae as the owner.",
+        "No trap/error strings mention \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\" after this change.",
+        "All trap/error messages remain in English."
       ]
     }
   ],
   "constraints": [
-    "Backend must be implemented as a single Motoko actor in backend/main.mo (no multi-canister backend architecture).",
-    "Only Internet Identity is used for authentication (no third-party auth providers).",
-    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui (compose these components/hooks instead)."
+    "Backend must remain a single Motoko actor with all logic in backend/main.mo.",
+    "Do not modify any frontend immutable paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Providing an off-chain or third-party payment flow for users to 'buy' SUZHI tokens (no Stripe or external checkout unless explicitly requested later).",
-    "Integrating external databases or non-ICP hosting providers.",
-    "Implementing real-time chat, push notifications, or WebSocket-based features.",
-    "Supporting external Web3 wallets like MetaMask/WalletConnect."
+    "Implementing the full ICRC-1 ledger interface (beyond the app’s existing balance/transfer calls).",
+    "Adding new UI flows or pages for minting.",
+    "Changing tokenomics or reward amounts unrelated to the initial 1B mint."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

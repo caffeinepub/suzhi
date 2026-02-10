@@ -9,7 +9,9 @@ import Text "mo:core/Text";
 import Order "mo:core/Order";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   // ========================================
   // Persistent State
@@ -23,7 +25,7 @@ actor {
   var totalSuzi = 1_000_000_000;
   var nextWorkLogId = 1;
   var nextDAOProposalId = 1;
-  var owner : ?Principal = null;
+  var initialMintCompleted = false;
 
   // Persistent maps
   let principalToCitizenId = Map.empty<Principal, Nat>();
@@ -96,17 +98,20 @@ actor {
   public type VotingStatus = { #pending; #approved; #rejected };
 
   // ========================================
-  // Internal Util Functions
+  // Onboarding (Citizens)
   // ========================================
-  func checkValidPrincipalId(caller : Principal) {
-    if (Principal.fromText("bx2wj-w4gwx-2fqc7-khufe-dwqgu-xt4im-fdq6d-7o3s7-xem24-clih4-ica") != caller) {
-      Runtime.trap("Invalid owner! Please manually replace [INSERT_YOUR_PRINCIPAL_ID_HERE] in owner field");
+  public shared ({ caller }) func onboardCitizen(citizenPrincipal : Principal) : async () {
+    // Only admin can onboard others, or users can self-register
+    if (caller != citizenPrincipal and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can onboard other citizens");
     };
-  };
 
-  func getNewCitizenId() : Nat {
+    if (principalToCitizenId.containsKey(citizenPrincipal)) {
+      Runtime.trap("Citizen already registered");
+    };
+
+    principalToCitizenId.add(citizenPrincipal, lastCitizenId);
     lastCitizenId += 1;
-    lastCitizenId;
   };
 
   // ========================================
@@ -131,23 +136,6 @@ actor {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
-  };
-
-  // ========================================
-  // Onboarding (Citizens)
-  // ========================================
-  public shared ({ caller }) func onboardCitizen(citizenPrincipal : Principal) : async () {
-    // Only admin can onboard others, or users can self-register
-    if (caller != citizenPrincipal and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can onboard other citizens");
-    };
-
-    if (principalToCitizenId.containsKey(citizenPrincipal)) {
-      Runtime.trap("Citizen already registered");
-    };
-
-    let newId = getNewCitizenId();
-    principalToCitizenId.add(citizenPrincipal, newId);
   };
 
   // ========================================
@@ -328,10 +316,8 @@ actor {
     proposalId;
   };
 
-  public query ({ caller }) func getVotingStatus(_ : Nat) : async VotingStatus {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view voting status");
-    };
+  public query func getVotingStatus(_ : Nat) : async VotingStatus {
+    // Public query - no authorization required for transparency
     #pending;
   };
 
