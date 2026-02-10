@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.5rem;
+        /* Earthy brown background */
+        --background: 0.28 0.08 40;
+        /* Sand/cream text */
+        --foreground: 0.95 0.02 60;
+        /* Deep brown cards */
+        --card: 0.32 0.09 35;
+        --card-foreground: 0.95 0.02 60;
+        /* Popover */
+        --popover: 0.32 0.09 35;
+        --popover-foreground: 0.95 0.02 60;
+        /* Gold primary */
+        --primary: 0.72 0.15 75;
+        --primary-foreground: 0.20 0.08 40;
+        /* Lighter brown secondary */
+        --secondary: 0.65 0.08 50;
+        --secondary-foreground: 0.20 0.08 40;
+        /* Muted earthy */
+        --muted: 0.45 0.06 45;
+        --muted-foreground: 0.75 0.04 55;
+        /* Gold accent */
+        --accent: 0.72 0.15 75;
+        --accent-foreground: 0.20 0.08 40;
+        /* Destructive red-brown */
+        --destructive: 0.50 0.20 25;
+        --destructive-foreground: 0.95 0.02 60;
+        /* Borders */
+        --border: 0.45 0.06 45;
+        --input: 0.45 0.06 45;
+        --ring: 0.72 0.15 75;
+        /* Charts */
+        --chart-1: 0.72 0.15 75;
+        --chart-2: 0.65 0.08 50;
+        --chart-3: 0.55 0.10 40;
+        --chart-4: 0.45 0.06 45;
+        --chart-5: 0.35 0.08 35;
+    }
+
+    .dark {
+        /* Darker brown background */
+        --background: 0.18 0.08 35;
+        /* Lighter sand text */
+        --foreground: 0.95 0.02 60;
+        /* Card slightly lighter than bg */
+        --card: 0.24 0.09 38;
+        --card-foreground: 0.95 0.02 60;
+        /* Popover */
+        --popover: 0.24 0.09 38;
+        --popover-foreground: 0.95 0.02 60;
+        /* Brighter gold for dark mode */
+        --primary: 0.78 0.18 75;
+        --primary-foreground: 0.18 0.08 35;
+        /* Secondary */
+        --secondary: 0.35 0.08 40;
+        --secondary-foreground: 0.95 0.02 60;
+        /* Muted */
+        --muted: 0.30 0.06 38;
+        --muted-foreground: 0.70 0.04 55;
+        /* Accent gold */
+        --accent: 0.78 0.18 75;
+        --accent-foreground: 0.18 0.08 35;
+        /* Destructive */
+        --destructive: 0.55 0.22 25;
+        --destructive-foreground: 0.95 0.02 60;
+        /* Borders */
+        --border: 0.35 0.06 40;
+        --input: 0.35 0.06 40;
+        --ring: 0.78 0.18 75;
+    }
+
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+}
+
+@layer utilities {
+    .gold-gradient {
+        background: linear-gradient(135deg, oklch(0.72 0.15 75) 0%, oklch(0.65 0.12 70) 100%);
+    }
+    
+    .earth-gradient {
+        background: linear-gradient(180deg, oklch(0.32 0.09 35) 0%, oklch(0.28 0.08 40) 100%);
+    }
+}

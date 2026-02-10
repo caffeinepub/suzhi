@@ -1,0 +1,141 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Deploy the SUZHI Decentralized Eco-City dApp on the Internet Computer (ICP), including Internet Identity onboarding with sequential citizen IDs, an ICRC-1 SUZHI token (1B max supply), proof-of-contribution work logging with peer verification and automatic rewards, and a token-based DAO with proposals, voting, and automated execution, plus an earthy gold/brown dashboard UI.",
+  "architectural_notes": [
+    "Use Internet Identity for authentication; map authenticated Principal -> citizen ID in a dedicated Citizen Registry canister.",
+    "Citizen ID assignment must be sequential and persisted across upgrades using stable memory (stable counter + stable mapping).",
+    "Token standard is ICRC-1; initialize with fixed max supply 1B and mint initial supply to a designated owner Principal.",
+    "Proof-of-contribution rewards are triggered only after 2 peer verifications; token transfers are executed by canister logic.",
+    "DAO governance uses token-weighted voting with fixed periods (7-day discussion, 5-day vote) and auto-execution on >50% approval.",
+    "UI theme palette: Gold #D4AF37, Brown #4B3621, Earthy #C2B280; core sections: profile/ID, wallet, contribution logger, governance portal."
+  ],
+  "known_issues": [
+    "Owner Principal for initial minting is not yet provided (placeholder [INSERT_YOUR_PRINCIPAL_ID_HERE])."
+  ],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-integrate-internet-identity-ii-authentication-in-the-frontend-so-users-can-sign-in-out-and-the-app-can-call-the-backend-as-the-authenticated-principal",
+      "title": "Integrate Internet Identity (II) authentication in the frontend so users can sign in/out and the app can call the backend as the authenticated principal.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-proof-of-contribution-allow-users-to-create-work-logs-in-four-categories-physical-knowledge-creative-wellness-and-require-exactly-2-peer-verifications-unique-verifiers-not-the-worker-before-the-backend-automatically-transfers-suzhi-tokens-to-the-worker",
+      "title": "Implement Proof of Contribution: allow users to create work logs in four categories (Physical, Knowledge, Creative, Wellness) and require exactly 2 peer verifications (unique verifiers, not the worker) before the backend automatically transfers SUZHI tokens to the worker.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-dao-system-in-the-motoko-backend-for-one-token-one-vote-with-proposal-submission-description-budget-timeline-a-7-day-discussion-period-a-5-day-voting-period-and-automatic-execution-for-proposals-approved-by-50-of-votes",
+      "title": "Implement a DAO system in the Motoko backend for One Token, One Vote with: proposal submission (description, budget, timeline), a 7-day discussion period, a 5-day voting period, and automatic execution for proposals approved by >50% of votes.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-suzhi-dashboard-ui-with-the-specified-gold-d4af37-brown-4b3621-and-earthy-c2b280-palette-and-include-the-following-sections-user-profile-show-principal-unique-citizen-id-token-wallet-balance-transfer-optional-buy-placeholder-contribution-logger-create-view-verify-logs-and-governance-portal-view-submit-vote-all-user-facing-text-must-be-in-english",
+      "title": "Build the SUZHI dashboard UI with the specified Gold (#D4AF37), Brown (#4B3621), and Earthy (#C2B280) palette, and include the following sections: User Profile (show principal + unique citizen ID), Token Wallet (balance + transfer + optional buy placeholder), Contribution Logger (create/view/verify logs), and Governance Portal (view/submit/vote). All user-facing text must be in English.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-coherent-eco-city-visual-theme-consistent-with-the-gold-brown-earthy-palette-typography-spacing-components-styling-across-the-app-without-introducing-new-product-features",
+      "title": "Apply a coherent 'eco-city' visual theme consistent with the gold/brown/earthy palette (typography, spacing, components styling) across the app without introducing new product features.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Integrate Internet Identity (II) authentication and a Citizen Registry canister that assigns sequential unique citizen IDs stored in stable memory",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Implement SUZHI token canister using ICRC-1 with max supply 1,000,000,000; mint full supply to specified Principal; enable transfers",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Build Proof of Contribution system: work logs in four categories (Physical/Knowledge/Creative/Wellness) requiring 2 peer verifications before automatic SUZHI token reward transfer",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Implement DAO canister for One Token One Vote: proposal submission (description, budget, timeline), 7-day discussion, 5-day voting, and automatic execution if >50% approval",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Design and build dashboard UI with gold/brown/earthy palette showing user profile (unique ID), token wallet, contribution logger, and governance portal",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add admin/distribution utility for testing (e.g., bulk airdrop/bulk transfer to many Principals) to fund ~100 testers quickly",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Implement a Citizen Registry in the Motoko backend that assigns each newly onboarded principal a unique sequential citizen ID (1, 2, 3, ...) and persists the counter and registry mapping in stable memory across upgrades.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Implement the SUZHI token in the Motoko backend following the ICRC-1 standard interface, with max supply = 1,000,000,000 and fully transferable balances between users.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Mint the entire 1,000,000,000 SUZHI supply at initialization to the provided owner Principal ID \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\", and provide a safe way to set/replace this placeholder with the real owner principal before production use.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Add an owner-restricted bulk distribution method `bulkAirdrop(recipients: [Principal], amount: Nat)` that transfers `amount` SUZHI to each recipient in a single call (or batched safely) to quickly fund ~100 testers.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Define a deterministic reward calculation for verified work logs and make the parameters configurable by an admin/owner (e.g., per-category base rate and/or per-hour rate), then use it for the automatic SUZHI reward transfer.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "SUZHI",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
