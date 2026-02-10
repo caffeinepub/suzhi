@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
+  "projectStateVersion": 7,
   "summary": "Deploy the SUZHI Decentralized Eco-City dApp on the Internet Computer (ICP), including Internet Identity onboarding with sequential citizen IDs, an ICRC-1 SUZHI token (1B max supply), proof-of-contribution work logging with peer verification and automatic rewards, and a token-based DAO with proposals, voting, and automated execution, plus an earthy gold/brown dashboard UI.",
   "architectural_notes": [
     "Use Internet Identity for authentication; map authenticated Principal -> citizen ID in a dedicated Citizen Registry canister.",
@@ -11,8 +11,10 @@
     "UI theme palette: Gold #D4AF37, Brown #4B3621, Earthy #C2B280; core sections: profile/ID, wallet, contribution logger, governance portal.",
     "Owner Principal for initial minting is specified as 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae."
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "SUZHI token not credited: current backend does not implement a real ICRC-1 token canister and does not perform the initial 1,000,000,000 SUZHI mint to the owner principal (balances stored only in an in-memory map)."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-integrate-internet-identity-ii-authentication-in-the-frontend-so-users-can-sign-in-out-and-the-app-can-call-the-backend-as-the-authenticated-principal",
@@ -51,6 +53,14 @@
       "title": "Apply a coherent 'eco-city' visual theme consistent with the gold/brown/earthy palette (typography, spacing, components styling) across the app without introducing new product features.",
       "reqIds": [
         "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-backend-transfer-balance-apis-to-be-consistent-either-a-keep-the-existing-backend-methods-used-by-the-current-frontend-getbalance-principal-and-transfer-to-amount-as-backward-compatible-wrappers-around-the-icrc-1-ledger-or-b-update-the-frontend-react-query-hooks-and-wallet-ui-to-call-the-icrc-1-transfer-balance-endpoints-ensure-user-facing-text-remains-in-english",
+      "title": "Update backend transfer/balance APIs to be consistent: either (a) keep the existing backend methods used by the current frontend (getBalance(principal) and transfer(to, amount)) as backward-compatible wrappers around the ICRC-1 ledger, or (b) update the frontend React Query hooks and wallet UI to call the ICRC-1 transfer/balance endpoints. Ensure user-facing text remains in English.",
+      "reqIds": [
+        "REQ-15"
       ],
       "version": 1
     }
@@ -145,6 +155,30 @@
       "summary": "Update any owner/principal validation logic and error messaging to reflect the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae) and remove references to the placeholder \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\" so that owner checks do not incorrectly trap for the new owner.",
       "reqIds": [
         "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Implement a real ICRC-1-compatible SUZHI token ledger in the existing Motoko single-actor canister (backend/main.mo), replacing the current in-memory-only balance Map behavior so balances are minted, transferred, and queried via ICRC-1 semantics.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Mint the full initial SUZHI supply of 1_000_000_000 exactly once to the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae), ensuring it cannot double-mint on redeploy/upgrade (use a persisted initialMintCompleted guard).",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Ensure all token ledger state required for balances, total supply, mint-guard (initialMintCompleted), and any token metadata is preserved across upgrades using stable state and, if applicable, backend/migration.mo under the project's conditional migration policy.",
+      "reqIds": [
+        "REQ-16"
       ],
       "status": "pending"
     }

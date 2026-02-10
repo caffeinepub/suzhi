@@ -9,9 +9,9 @@ import Text "mo:core/Text";
 import Order "mo:core/Order";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   // ========================================
   // Persistent State
@@ -377,3 +377,4 @@ actor {
     daoProposals.values().toArray();
   };
 };
+

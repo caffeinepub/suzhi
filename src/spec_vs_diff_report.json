@@ -1,41 +1,51 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T20:14:42.941Z",
-  "summary": "The diff introduces a migration module and new persistent state fields (notably `initialMintCompleted`), but there is no clear evidence in the provided truncated diff that the specified owner principal is set, that the initial 1,000,000,000 SUZHI is minted to that principal exactly once, or that placeholder owner validation/error messages were updated/removed.",
+  "generatedAt": "2026-02-10T20:31:41.243Z",
+  "summary": "The diff updates the wallet UI and React Query hooks to improve validation and error handling while still calling backend.getBalance(principal) and backend.transfer(to, amount). However, the provided backend/main.mo diff snippet does not show implementation of an ICRC-1-compatible ledger, ICRC-1 endpoints, upgrade-stable persistence, or one-time initial minting to the specified owner principal.",
   "missing_requirements": [
     {
-      "id": "REQ-11",
-      "requirement": "Set the SUZHI token initial owner principal to 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae and mint the full initial supply of 1_000_000_000 SUZHI to that Principal exactly once (no double-mint on redeploy/upgrade).",
-      "reason": "The diff shows `totalSuzi = 1_000_000_000` and adds `initialMintCompleted`, but there is no visible initialization code that credits `allBalances` for the specified principal, nor any visible logic that uses `initialMintCompleted` to prevent re-minting on upgrade/redeploy.",
+      "id": "REQ-13",
+      "requirement": "Implement a real ICRC-1-compatible SUZHI token ledger in backend/main.mo with standard ICRC-1 query endpoints (name/symbol/decimals/fee/total_supply/balance_of) and a standard ICRC-1 transfer endpoint, with balances tracked in persistent state across upgrades.",
+      "reason": "The backend diff snippet shows an in-canister Map-based balance store (allBalances) and variables like totalSuzi, but no evidence of exposed ICRC-1 endpoints (icrc1_name, icrc1_symbol, icrc1_decimals, icrc1_fee, icrc1_total_supply, icrc1_balance_of, icrc1_transfer) or persistent/stable ledger state implementation in the visible changes.",
       "evidence": [
-        "backend/main.mo",
-        "backend/migration.mo"
+        "backend/main.mo"
       ]
     },
     {
-      "id": "REQ-12",
-      "requirement": "Update any owner/principal validation logic and error messaging to reflect the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae) and remove references to the placeholder \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\".",
-      "reason": "No owner principal constant/variable or updated validation logic is shown in the truncated `backend/main.mo` snippet, and there is no evidence that trap/error strings referencing the placeholder were removed or replaced.",
+      "id": "REQ-14",
+      "requirement": "Mint the full initial SUZHI supply of 1_000_000_000 exactly once to the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae) using a persisted initialMintCompleted guard; prevent double-mint on redeploy/upgrade; remove placeholder owner principal references.",
+      "reason": "Although initialMintCompleted is present as a variable in the snippet, there is no evidence of mint logic that mints 1_000_000_000 to the specified owner principal, nor evidence that the guard is persisted across upgrades, nor any owner principal constant/check logic shown.",
       "evidence": [
         "backend/main.mo"
       ]
-    }
-  ],
-  "hallucinated_features": [
+    },
     {
-      "description": "Added a separate migration module (`backend/migration.mo`) and wired it into the actor via `(with migration = Migration.run)`.",
-      "reason": "The BuildRequest constraint says: \"Backend must remain a single Motoko actor with all logic in backend/main.mo.\" Adding `backend/migration.mo` introduces backend logic outside `backend/main.mo`, which is not requested and may violate the stated constraint.",
+      "id": "REQ-15",
+      "requirement": "Ensure balance/transfer APIs are consistent: either keep getBalance(principal) and transfer(to, amount) as backward-compatible wrappers around the ICRC-1 ledger, or update frontend to call ICRC-1 endpoints; wallet must show balance and enable transfers with English insufficient-balance errors.",
+      "reason": "Frontend continues to call actor.getBalance(principal) and actor.transfer(to, amount), but the backend diff snippet does not show that these methods are implemented as wrappers over a real ICRC-1 ledger (or that the frontend was updated to call ICRC-1 endpoints directly). Therefore the required API consistency with the new ICRC-1 ledger is not evidenced.",
       "evidence": [
-        "backend/migration.mo",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/components/wallet/TokenWalletCard.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "requirement": "Preserve ledger state (balances, total supply, initialMintCompleted, metadata) across upgrades using stable state and (if needed) backend/migration.mo; preserve prior balances from pre-ICRC in-memory map where possible.",
+      "reason": "The backend snippet shows ordinary var/let declarations and Map.empty() usage but does not show stable variables, preupgrade/postupgrade hooks, or any migration logic/file changes. No backend/migration.mo changes are shown.",
+      "evidence": [
         "backend/main.mo"
       ]
     }
   ],
-  "confidence": 0.74,
+  "hallucinated_features": [],
+  "confidence": 0.72,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/wallet/TokenWalletCard.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]
 }

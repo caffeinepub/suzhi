@@ -1,6 +1,28 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Mint initial 1,000,000,000 SUZHI supply to specified Principal (frontend-only plan)",
-  "requirements": []
+  "title": "Wire Wallet balance/transfer UI to the real SUZHI ledger (frontend)",
+  "requirements": [
+    {
+      "id": "REQ-15",
+      "summary": "Keep the Wallet UI and React Query hooks compatible with the updated real SUZHI ledger by continuing to use the existing getBalance/transfer backend methods (as wrappers) and improving user-visible validation/error handling in English.",
+      "acceptanceCriteria": [
+        "From the Wallet section, a signed-in user can see their SUZHI balance and successfully transfer tokens to another valid principal.",
+        "On transfer success, the sender balance decreases and the recipient balance increases by the transfer amount.",
+        "If the sender attempts to transfer more than their balance, the UI shows an English error message indicating insufficient balance (no silent failure)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Harden wallet React Query hooks to work reliably with the real ledger-backed backend methods: keep using actor.getBalance(principal) and actor.transfer(to, amount) (backward-compatible wrappers), ensure balance queries do not mask backend errors as 0, improve transfer error mapping to a clear English insufficient-balance message, and keep invalidation of balance queries on successful transfers."
+        },
+        {
+          "path": "frontend/src/components/wallet/TokenWalletCard.tsx",
+          "operation": "modify",
+          "description": "Improve Wallet UI transfer flow: validate recipient principal and amount (positive integer BigInt), surface invalid input errors to the user (English) instead of only console logging, and ensure transfer success clears the form while balance updates via React Query invalidation."
+        }
+      ]
+    }
+  ]
 }

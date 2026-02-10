@@ -1,53 +1,97 @@
 {
   "kind": "build_request",
-  "title": "Mint initial 1,000,000,000 SUZHI supply to specified Principal",
-  "priority": "normal",
+  "title": "Implement real ICRC-1 SUZHI token minting and wire wallet balance/transfer to it",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-11",
-      "text": "Set the SUZHI token initial owner principal to 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae and mint the full initial supply of 1_000_000_000 SUZHI to that Principal exactly once (no double-mint on redeploy/upgrade).",
+      "id": "REQ-13",
+      "text": "Implement a real ICRC-1-compatible SUZHI token ledger in the existing Motoko single-actor canister (backend/main.mo), replacing the current in-memory-only balance Map behavior so balances are minted, transferred, and queried via ICRC-1 semantics.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-6",
+          "msg-15"
         ],
         "quotes": [
-          "Mint 1Billion SUZHI tokens ICRC-1 standard token called \"SUZHI\". mint to this principal id 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae"
+          "SUZHI token still not credited",
+          "yes"
         ]
       },
       "acceptanceCriteria": [
-        "After deployment, getBalance(Principal.fromText(\"2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae\")) returns 1_000_000_000.",
-        "No other principal has a non-zero balance unless explicitly transferred/airdropped after deployment.",
-        "Upgrading the canister does not mint an additional 1_000_000_000 to the owner (owner balance is not duplicated/increased by the initialization logic)."
+        "The canister exposes standard ICRC-1 query endpoints for token info and balances (e.g., name/symbol/decimals/fee/total_supply/balance_of) and a standard ICRC-1 transfer endpoint.",
+        "Token balances are tracked in persistent state (survive canister upgrades).",
+        "The existing dashboard can retrieve the authenticated user's balance without showing 0 due to missing minting."
       ]
     },
     {
-      "id": "REQ-12",
-      "text": "Update any owner/principal validation logic and error messaging to reflect the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae) and remove references to the placeholder \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\" so that owner checks do not incorrectly trap for the new owner.",
+      "id": "REQ-14",
+      "text": "Mint the full initial SUZHI supply of 1_000_000_000 exactly once to the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae), ensuring it cannot double-mint on redeploy/upgrade (use a persisted initialMintCompleted guard).",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-6",
+          "msg-15"
         ],
         "quotes": [
-          "mint to this principal id 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae"
+          "SUZHI token still not credited",
+          "yes"
         ]
       },
       "acceptanceCriteria": [
-        "Owner validation (if used anywhere for admin/owner-only actions) recognizes 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae as the owner.",
-        "No trap/error strings mention \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\" after this change.",
-        "All trap/error messages remain in English."
+        "After deployment, the owner principal balance equals 1_000_000_000 (minus any transfers made later).",
+        "Subsequent upgrades do not mint again; total supply remains unchanged except for transfers (no inflation).",
+        "No references to the placeholder owner principal string remain in owner-check logic or error messages."
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Update backend transfer/balance APIs to be consistent: either (a) keep the existing backend methods used by the current frontend (getBalance(principal) and transfer(to, amount)) as backward-compatible wrappers around the ICRC-1 ledger, or (b) update the frontend React Query hooks and wallet UI to call the ICRC-1 transfer/balance endpoints. Ensure user-facing text remains in English.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6",
+          "msg-15"
+        ],
+        "quotes": [
+          "SUZHI token still not credited",
+          "yes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "From the Wallet section, a signed-in user can see their SUZHI balance and successfully transfer tokens to another valid principal.",
+        "On transfer success, the sender balance decreases and the recipient balance increases by the transfer amount.",
+        "If the sender attempts to transfer more than their balance, the UI shows an English error message indicating insufficient balance (no silent failure)."
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Ensure all token ledger state required for balances, total supply, mint-guard (initialMintCompleted), and any token metadata is preserved across upgrades using stable state and, if applicable, backend/migration.mo under the project's conditional migration policy.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-6",
+          "msg-15"
+        ],
+        "quotes": [
+          "SUZHI token still not credited",
+          "yes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After an upgrade, previously minted balances and transfer history effects (resulting balances) remain intact.",
+        "If a migration step is required due to state shape changes, the upgrade completes without traps and preserves prior user balances from the pre-ICRC in-memory map (where possible)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor with all logic in backend/main.mo.",
-    "Do not modify any frontend immutable paths listed in SYSTEM_CONTEXT."
+    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
+    "Do not edit frontend files under frontend/src/components/ui or the immutable hook/bootstrap paths listed in SYSTEM_CONTEXT (compose instead of editing those).",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Implementing the full ICRC-1 ledger interface (beyond the app’s existing balance/transfer calls).",
-    "Adding new UI flows or pages for minting.",
-    "Changing tokenomics or reward amounts unrelated to the initial 1B mint."
+    "Do not add a separate token canister or multi-canister architecture for this change.",
+    "Do not add third-party wallet integrations or non-Internet-Identity authentication.",
+    "Do not introduce new product features beyond making SUZHI minting/ledger real and correctly reflected in the existing wallet UI."
   ],
   "imageRequirements": {
     "required": [],

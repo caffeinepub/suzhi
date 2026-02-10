@@ -1,25 +1,45 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T20:14:42.943Z",
+  "generatedAt": "2026-02-10T20:31:41.246Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 0,
+    "total": 4,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-11",
-        "summary": "Set the SUZHI token initial owner principal to 2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae and mint the full initial supply of 1_000_000_000 SUZHI to that Principal exactly once (no double-mint on redeploy/upgrade).",
+        "id": "REQ-13",
+        "summary": "Implement a real ICRC-1-compatible SUZHI token ledger in the existing Motoko single-actor canister (backend/main.mo), replacing the current in-memory-only balance Map behavior so balances are minted, transferred, and queried via ICRC-1 semantics.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-12",
-        "summary": "Update any owner/principal validation logic and error messaging to reflect the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae) and remove references to the placeholder \"[INSERT_YOUR_PRINCIPAL_ID_HERE]\" so that owner checks do not incorrectly trap for the new owner.",
+        "id": "REQ-14",
+        "summary": "Mint the full initial SUZHI supply of 1_000_000_000 exactly once to the configured owner principal (2psws-zhgt3-afmzp-mjr66-z74ph-qbyjh-zdc6u-b4yku-y7qm3-zl2ev-2ae), ensuring it cannot double-mint on redeploy/upgrade (use a persisted initialMintCompleted guard).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-15",
+        "summary": "Update backend transfer/balance APIs to be consistent: either (a) keep the existing backend methods used by the current frontend (getBalance(principal) and transfer(to, amount)) as backward-compatible wrappers around the ICRC-1 ledger, or (b) update the frontend React Query hooks and wallet UI to call the ICRC-1 transfer/balance endpoints. Ensure user-facing text remains in English.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/wallet/TokenWalletCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/wallet/TokenWalletCard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-16",
+        "summary": "Ensure all token ledger state required for balances, total supply, mint-guard (initialMintCompleted), and any token metadata is preserved across upgrades using stable state and, if applicable, backend/migration.mo under the project's conditional migration policy.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
@@ -28,15 +48,12 @@
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
-    "build-template/README.md",
     "feature_evidence.json",
+    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/components/wallet/TokenWalletCard.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
